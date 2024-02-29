@@ -1,2 +1,5 @@
 # ignore environment setup
 env.sh
+
+# ignore wandb folders
+*/wandb/
