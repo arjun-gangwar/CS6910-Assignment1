@@ -1,4 +1,8 @@
 import numpy as np
+from layer import Linear
+from activation import Sigmoid, Softmax
+from loss import CrossEntropyLoss
+from optimizer import SGD, MomentumSGD, NestrovSGD, RMSProp, Adam, NAdam
 
 class NeuralNetwork():
     def __init__(self,
@@ -37,5 +41,23 @@ class NeuralNetwork():
         self.num_layers = num_layers
         self.hidden_size = hidden_size
         self.activation = activation
+        self.output_activation = None
+        self.train_loss_history = []
+        self.valid_loss_history = []
+        self.train_acc_history = []
+        self.valid_acc_history = []
+
+    def init_activation(self):
+        pass
+    
+    def init_loss(self):
+        pass
+
+    def init_network(self):
+        pass
+
+
+
+
 
     

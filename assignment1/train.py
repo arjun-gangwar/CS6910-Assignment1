@@ -1,9 +1,28 @@
 import numpy
 import pandas
 import argparse
+from neural_network import NeuralNetwork
 
 def main(args: argparse.Namespace):
-    pass
+    nn = NeuralNetwork(
+        wandb_project=args.wandb_project,
+        wandb_entity=args.wandb_entity,
+        epochs=args.epochs,
+        batch_size=args.batch_size,
+        loss=args.loss,
+        optimizer=args.optimizer,
+        learning_rate=args.learning_rate,
+        momentum=args.momentum,
+        beta=args.beta,
+        beta1=args.beta1,
+        beta2=args.beta2,
+        epsilon=args.epsilon,
+        weight_decay=args.weight_decay,
+        weight_init=args.weight_init,
+        num_layers=args.num_layers,
+        hidden_size=args.hidden_size,
+        activation=args.activation,
+    )
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Training Parameters")
