@@ -1,4 +1,5 @@
 import numpy as np
+from helper import one_hot_encode
 from layer import Linear
 from activation import Sigmoid, Softmax
 from loss import CrossEntropyLoss
@@ -6,9 +7,9 @@ from optimizer import SGD, MomentumSGD, NestrovSGD, RMSProp, Adam, NAdam
 
 class NeuralNetwork():
     def __init__(self,
-                #  wandb_project: str,
-                #  wandb_entity: str,
-                #  dataset: str,/
+                 wandb_project: str,
+                 wandb_entity: str,
+                 dataset: str,
                  in_dim: int,
                  out_dim: int,
                  epochs: int,
@@ -76,7 +77,7 @@ class NeuralNetwork():
                 self.layers.append(Linear(self.in_dim, self.hidden_size, self.weight_init))
                 self.layers.append(self.activation_func)
             # Output Layer
-            elif i == self.hidden_size-1:
+            elif i == self.num_layers-1:
                 self.layers.append(Linear(self.hidden_size, self.out_dim, self.weight_init))
                 self.layers.append(self.output_func)
             # Hidden Layers
@@ -84,18 +85,55 @@ class NeuralNetwork():
                 self.layers.append(Linear(self.hidden_size, self.hidden_size, self.weight_init))
                 self.layers.append(self.activation_func)
 
-    def forwardPass():
+    def forwardPass(self):
         pass
 
-    def backwardPass():
+    def backwardPass(self):
         pass
 
     def print_status(self):
         pass
 
-    def run(self):
-        pass
+    def run(self, xtrain, ytrain):
+        ix = np.random.randint(0, xtrain.shape[0], (self.batch_size,))
+        xb = xtrain[ix]
+        yb = ytrain[ix]
+        yb_enc = one_hot_encode(yb, self.out_dim)
 
+        n_batch_per_epoch = xtrain.shape[0] // self.batch_size
+
+        for i in range(self.epochs):
+            loss = []
+            acc = []
+            for _ in range(n_batch_per_epoch):
+
+                # forward prop
+                y_hat = xb
+                for layer in self.layers:
+                    y_hat = layer(y_hat)
+
+                loss.append(self.loss_func(yb_enc, y_hat))
+
+                # calculate accuracy
+                pred = np.argmax(y_hat, axis=-1)
+                acc.append((pred==yb).sum() / self.batch_size)
+
+                # backward prop
+                prev_grad = self.loss_func.diff()
+                for layer in self.layers[::-1]:
+                    prev_grad = layer.diff(prev_grad)
+                
+                # gradient descent
+                for layer in self.layers:
+                    if isinstance(layer, Linear):
+                        layer.weight -= self.learning_rate * layer.dw
+                        layer.bias -= self.learning_rate * layer.db
+
+            # print stats per epoch
+            print("- - - - - - - - - - - -")
+            print(f'epoch {i}')
+            print(f"loss: {np.array(loss).mean()}")
+            print(f"acc: {np.array(acc).mean()}")
 
 
 

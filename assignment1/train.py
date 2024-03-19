@@ -1,12 +1,32 @@
 import numpy
 import pandas
 import argparse
+from keras.datasets import fashion_mnist
 from neural_network import NeuralNetwork
 
 def main(args: argparse.Namespace):
+    (xtrain, ytrain), (xtest, ytest) = fashion_mnist.load_data()
+
+    # split test into  valid and test
+    n = xtest.shape[0]//2
+    xvalid, yvalid = xtest[:n,:,:], ytest[:n]
+    xtest, ytest = xtest[n:,:,:], ytest[n:]
+
+    # normalizing data
+    xtrain = xtrain.reshape(xtrain.shape[0], -1) / 255
+    xvalid = xvalid.reshape(xvalid.shape[0], -1) / 255
+    xtest = xtest.reshape(xtest.shape[0], -1) / 255
+
+    print(f"{xtrain.shape=} {ytrain.shape=}")
+    print(f"{xvalid.shape=} {yvalid.shape=}")
+    print(f"{xtest.shape=} {ytest.shape=}")
+
     nn = NeuralNetwork(
         wandb_project=args.wandb_project,
         wandb_entity=args.wandb_entity,
+        dataset=args.dataset,
+        in_dim=784,
+        out_dim=10,
         epochs=args.epochs,
         batch_size=args.batch_size,
         loss=args.loss,
@@ -23,6 +43,8 @@ def main(args: argparse.Namespace):
         hidden_size=args.hidden_size,
         activation=args.activation,
     )
+
+    nn.run(xtrain, ytrain)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Training Parameters")
