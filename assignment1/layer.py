@@ -1,9 +1,13 @@
 import numpy as np
 
 class Linear:
-    def __init__(self, fan_in, fan_out):
-        self.weight = np.random.randn(fan_in, fan_out)
-        self.bias = np.zeros(fan_out)
+    def __init__(self, fan_in, fan_out, init_method):
+        if init_method == "xavier":
+            self.weight = np.random.randn(fan_in, fan_out)
+            self.bias = np.zeros(fan_out)
+        else:
+            self.weight = np.random.randn(fan_in, fan_out)
+            self.bias = np.zeros(fan_out)
         self.dw = 0.
         self.db = 0.
         self.uw = 0.

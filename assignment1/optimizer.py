@@ -3,47 +3,47 @@ from abc import ABC, abstractmethod
 
 # abstract class for optimizers
 
-class Optimizer(ABC):
+class ABSOptimizer(ABC):
     @abstractmethod
     def optimize(self):
         pass
 
-class SGD(Optimizer):
+class SGD(ABSOptimizer):
     def __init__(self):
         pass
     # overriding abstract method
     def optimize(self):
         pass
 
-class MomentumSGD(Optimizer):
+class MomentumSGD(ABSOptimizer):
     def __init__(self):
         pass
     # overriding abstract method
     def optimize(self):
         pass
 
-class NestrovSGD(Optimizer):
+class NestrovSGD(ABSOptimizer):
     def __init__(self):
         pass
     # overriding abstract method
     def optimize(self):
         pass
 
-class RMSProp(Optimizer):
+class RMSProp(ABSOptimizer):
     def __init__(self):
         pass
     # overriding abstract method
     def optimize(self):
         pass
 
-class Adam(Optimizer):
+class Adam(ABSOptimizer):
     def __init__(self):
         pass
     # overriding abstract method
     def optimize(self):
         pass
 
-class NAdam(Optimizer):
+class NAdam(ABSOptimizer):
     def __init__(self):
         pass
     # overriding abstract method
