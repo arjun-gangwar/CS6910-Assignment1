@@ -18,10 +18,8 @@ class Linear:
     def diff(self, prev_grad):
         diff = self.weight.T 
         # calculate dl/dw, dl/db ---> can write a separate func in class
-        # self.dw = np.mean(self.x[:,:,np.newaxis] @ prev_grad[:,np.newaxis,:], axis=0)
         self.dw = np.dot(self.x.T, prev_grad)
         self.db = np.sum(prev_grad, axis=0)
-        
         return prev_grad @ diff
     
     def parameters(self):

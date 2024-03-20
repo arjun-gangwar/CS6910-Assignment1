@@ -1,5 +1,5 @@
 import numpy as np
-from helper import one_hot_encode
+from helper import one_hot_encode, DataLoader
 from layer import Linear
 from activation import Sigmoid, Softmax, Tanh
 from loss import CrossEntropyLoss
@@ -94,18 +94,23 @@ class NeuralNetwork():
                 sum += np.sum(np.square(layer.weight))
         return sum
 
-    def forwardPass(self):
-        pass
+    def forwardPass(self, xb):
+        y_hat = xb
+        for layer in self.layers:
+            y_hat = layer(y_hat)
+        return y_hat
 
     def backwardPass(self):
-        pass
+        prev_grad = self.loss_func.diff()
+        for layer in self.layers[::-1]:
+            prev_grad = layer.diff(prev_grad)
 
     def print_status(self):
         pass
 
     def run(self, xtrain, ytrain, xvalid, yvalid):
         n_batch_per_epoch = xtrain.shape[0] // self.batch_size
-
+        data_loader = DataLoader(xtrain, ytrain, self.batch_size)
         for i in range(self.epochs):
             loss = []
             acc = []
@@ -114,15 +119,11 @@ class NeuralNetwork():
             for _ in range(n_batch_per_epoch):
                 
                 # creating mini-batch
-                ix = np.random.randint(0, xtrain.shape[0], (self.batch_size,))
-                xb = xtrain[ix]
-                yb = ytrain[ix]
+                xb, yb = data_loader()
                 yb_enc = one_hot_encode(yb, self.out_dim)
 
                 # forward prop
-                y_hat = xb
-                for layer in self.layers:
-                    y_hat = layer(y_hat)
+                y_hat = self.forwardPass(xb)
 
                 loss.append(self.loss_func(yb_enc, y_hat) + ((self.weight_decay/2) * self.sum_of_squared_weights()))
 
@@ -131,9 +132,7 @@ class NeuralNetwork():
                 acc.append((pred==yb).sum() / self.batch_size)
 
                 # backward prop
-                prev_grad = self.loss_func.diff()
-                for layer in self.layers[::-1]:
-                    prev_grad = layer.diff(prev_grad)
+                self.backwardPass()
                 
                 # gradient descent
                 for k, layer in enumerate(self.layers):
@@ -152,9 +151,7 @@ class NeuralNetwork():
                 yb = yvalid[start:end]
                 yb_enc = one_hot_encode(yb, self.out_dim)
 
-                y_hat = xb
-                for layer in self.layers:
-                    y_hat = layer(y_hat)
+                y_hat = self.forwardPass(xb)
 
                 valid_loss.append(self.loss_func(yb_enc, y_hat) + ((self.weight_decay/2) * self.sum_of_squared_weights()))
 

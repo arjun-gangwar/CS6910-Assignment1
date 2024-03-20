@@ -2,7 +2,7 @@ import numpy as np
 
 class Sigmoid:
     def __call__(self, x):
-        self.x = x      # for backprop
+        self.x = x
         self.out = 1 / (1 + np.exp(-x))
         return self.out
     def diff(self, prev_grad):
@@ -15,7 +15,7 @@ class Sigmoid:
     
 class Tanh:
     def __call__(self, x):
-        self.x = x      # for backprop
+        self.x = x
         self.out = np.tanh(x)
         return self.out
     def diff(self, prev_grad):
@@ -30,9 +30,6 @@ class Softmax:
     def __call__(self, x):
         self.x = x      # for backprop
         self.out = np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
-        # shifted = x - np.max(x, axis=1, keepdims=True)
-        # exps = np.exp(shifted)
-        # self.out = exps / np.sum(exps, axis=1, keepdims=True)
         return self.out
     def diff(self, prev_grad):
         e_l = prev_grad != 0.
