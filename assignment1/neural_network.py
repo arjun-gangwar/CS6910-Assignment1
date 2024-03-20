@@ -109,14 +109,14 @@ class NeuralNetwork():
         pass
 
     def run(self, xtrain, ytrain, xvalid, yvalid):
-        n_batch_per_epoch = xtrain.shape[0] // self.batch_size
+        n_batch = xtrain.shape[0] // self.batch_size
         data_loader = DataLoader(xtrain, ytrain, self.batch_size)
         for i in range(self.epochs):
             loss = []
             acc = []
             valid_loss = []
             valid_acc = []
-            for _ in range(n_batch_per_epoch):
+            for _ in range(n_batch):
                 
                 # creating mini-batch
                 xb, yb = data_loader()
@@ -140,6 +140,15 @@ class NeuralNetwork():
                         # print("layer: ", k, "dw norm: ", np.linalg.norm(layer.dw), "db norm: ", np.linalg.norm(layer.db))
                         layer.weight -= self.learning_rate * (layer.dw + self.weight_decay * layer.weight) 
                         layer.bias -= self.learning_rate * layer.db
+
+                # momentum based gradient descent
+                # beta = 0.90
+                # for layer in layers:
+                #     if isinstance(layer, Linear):
+                #         layer.uw = beta * layer.uw + layer.dw
+                #         layer.ub = beta * layer.ub + layer.db
+                #         layer.weight -= eta * layer.uw
+                #         layer.bias -= eta * layer.ub
 
             # valid forward prop
             n_batch = xvalid.shape[0] // self.batch_size
