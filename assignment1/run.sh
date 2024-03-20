@@ -12,11 +12,11 @@ beta=0.5
 beta1=0.5
 beta2=0.5
 epsilon=0.000001
-weight_decay=0
-weight_init=random
+weight_decay=0.005
+weight_init=xavier
 num_layers=3
-hidden_size=128
-activation=sigmoid
+hidden_size=256
+activation=tanh
 
 python train.py \
     --wandb_project ${wandb_project} \

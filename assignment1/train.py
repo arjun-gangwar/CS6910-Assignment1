@@ -44,7 +44,7 @@ def main(args: argparse.Namespace):
         activation=args.activation,
     )
 
-    nn.run(xtrain, ytrain)
+    nn.run(xtrain, ytrain, xvalid, yvalid)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Training Parameters")

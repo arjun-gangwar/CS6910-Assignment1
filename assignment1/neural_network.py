@@ -1,7 +1,7 @@
 import numpy as np
 from helper import one_hot_encode
 from layer import Linear
-from activation import Sigmoid, Softmax
+from activation import Sigmoid, Softmax, Tanh
 from loss import CrossEntropyLoss
 from optimizer import SGD, MomentumSGD, NestrovSGD, RMSProp, Adam, NAdam
 
@@ -64,6 +64,8 @@ class NeuralNetwork():
     def init_activation(self):
         if self.activation == "sigmoid":
             self.activation_func = Sigmoid()
+        if self.activation == "tanh":
+            self.activation_func = Tanh()
     
     def init_loss(self):
         if self.loss == "cross_entropy":
@@ -85,6 +87,13 @@ class NeuralNetwork():
                 self.layers.append(Linear(self.hidden_size, self.hidden_size, self.weight_init))
                 self.layers.append(self.activation_func)
 
+    def sum_of_squared_weights(self):
+        sum = 0.0
+        for layer in self.layers:
+            if isinstance(layer, Linear):
+                sum += np.sum(np.square(layer.weight))
+        return sum
+
     def forwardPass(self):
         pass
 
@@ -94,25 +103,28 @@ class NeuralNetwork():
     def print_status(self):
         pass
 
-    def run(self, xtrain, ytrain):
-        ix = np.random.randint(0, xtrain.shape[0], (self.batch_size,))
-        xb = xtrain[ix]
-        yb = ytrain[ix]
-        yb_enc = one_hot_encode(yb, self.out_dim)
-
+    def run(self, xtrain, ytrain, xvalid, yvalid):
         n_batch_per_epoch = xtrain.shape[0] // self.batch_size
 
         for i in range(self.epochs):
             loss = []
             acc = []
+            valid_loss = []
+            valid_acc = []
             for _ in range(n_batch_per_epoch):
+                
+                # creating mini-batch
+                ix = np.random.randint(0, xtrain.shape[0], (self.batch_size,))
+                xb = xtrain[ix]
+                yb = ytrain[ix]
+                yb_enc = one_hot_encode(yb, self.out_dim)
 
                 # forward prop
                 y_hat = xb
                 for layer in self.layers:
                     y_hat = layer(y_hat)
 
-                loss.append(self.loss_func(yb_enc, y_hat))
+                loss.append(self.loss_func(yb_enc, y_hat) + ((self.weight_decay/2) * self.sum_of_squared_weights()))
 
                 # calculate accuracy
                 pred = np.argmax(y_hat, axis=-1)
@@ -124,16 +136,39 @@ class NeuralNetwork():
                     prev_grad = layer.diff(prev_grad)
                 
                 # gradient descent
-                for layer in self.layers:
+                for k, layer in enumerate(self.layers):
                     if isinstance(layer, Linear):
-                        layer.weight -= self.learning_rate * layer.dw
+                        # print("layer: ", k, "dw norm: ", np.linalg.norm(layer.dw), "db norm: ", np.linalg.norm(layer.db))
+                        layer.weight -= self.learning_rate * (layer.dw + self.weight_decay * layer.weight) 
                         layer.bias -= self.learning_rate * layer.db
+
+            # valid forward prop
+            n_batch = xvalid.shape[0] // self.batch_size
+
+            for k in range(n_batch):
+                start = k * self.batch_size
+                end = start + self.batch_size
+                xb = xvalid[start:end, :]
+                yb = yvalid[start:end]
+                yb_enc = one_hot_encode(yb, self.out_dim)
+
+                y_hat = xb
+                for layer in self.layers:
+                    y_hat = layer(y_hat)
+
+                valid_loss.append(self.loss_func(yb_enc, y_hat) + ((self.weight_decay/2) * self.sum_of_squared_weights()))
+
+                # calculate accuracy
+                pred = np.argmax(y_hat, axis=-1)
+                valid_acc.append((pred==yb).sum() / self.batch_size)
 
             # print stats per epoch
             print("- - - - - - - - - - - -")
             print(f'epoch {i}')
             print(f"loss: {np.array(loss).mean()}")
             print(f"acc: {np.array(acc).mean()}")
+            print(f"valid loss: {np.array(valid_loss).mean()}")
+            print(f"valid acc: {np.array(valid_acc).mean()}")
 
 
 
