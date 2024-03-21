@@ -1,11 +1,11 @@
 #!/bin/bash
 wandb_project=fake
 wandb_entity=fake
-dataset=fake
+dataset=fashion_mnist
 epochs=10
-batch_size=16
+batch_size=64
 loss=cross_entropy
-optimizer=sgd
+optimizer=nag
 learning_rate=1e-4
 momentum=0.9
 beta=0.9
@@ -14,9 +14,9 @@ beta2=0.999
 epsilon=1e-8
 weight_decay=0.0005
 weight_init=xavier
-num_layers=5
-hidden_size=128
-activation=relu
+num_layers=3
+hidden_size=256
+activation=tanh
 
 python train.py \
     --wandb_project ${wandb_project} \

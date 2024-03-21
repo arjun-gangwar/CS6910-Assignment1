@@ -2,10 +2,15 @@ import numpy
 import pandas
 import argparse
 from keras.datasets import fashion_mnist
+from keras.datasets import mnist
 from neural_network import NeuralNetwork
 
 def main(args: argparse.Namespace):
-    (xtrain, ytrain), (xtest, ytest) = fashion_mnist.load_data()
+
+    if args.dataset == 'fashion_mnist':
+        (xtrain, ytrain), (xtest, ytest) = fashion_mnist.load_data()
+    elif args.dataset == 'mnist':
+        (xtrain, ytrain), (xtest, ytest) = mnist.load_data()
 
     # split test into  valid and test
     n = xtest.shape[0]//2
@@ -24,7 +29,6 @@ def main(args: argparse.Namespace):
     nn = NeuralNetwork(
         wandb_project=args.wandb_project,
         wandb_entity=args.wandb_entity,
-        dataset=args.dataset,
         in_dim=784,
         out_dim=10,
         epochs=args.epochs,

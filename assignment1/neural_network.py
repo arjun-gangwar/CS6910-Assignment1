@@ -3,13 +3,12 @@ from helper import one_hot_encode, DataLoader
 from layer import Linear
 from activation import Sigmoid, Softmax, Tanh, ReLU
 from loss import CrossEntropyLoss
-from optimizer import SGD, MomentumSGD, NestrovSGD, RMSProp, Adam, NAdam
+from optimizer import SGD, Momentum, Nestrov, RMSProp, Adam, NAdam
 
 class NeuralNetwork():
     def __init__(self,
                  wandb_project: str,
                  wandb_entity: str,
-                 dataset: str,
                  in_dim: int,
                  out_dim: int,
                  epochs: int,
@@ -29,7 +28,6 @@ class NeuralNetwork():
                  activation: str):
         self.wandb_project = wandb_project
         self.wandb_entity = wandb_entity
-        self.dataset = dataset
         self.in_dim = in_dim
         self.out_dim = out_dim
         self.epochs = epochs
@@ -58,6 +56,7 @@ class NeuralNetwork():
         self.valid_acc_history = []
         # initialize network
         self.init_activation()
+        self.init_optimizer()
         self.init_loss()
         self.init_network()
 
@@ -68,7 +67,21 @@ class NeuralNetwork():
             self.activation_func = Tanh()
         elif self.activation == "relu":
             self.activation_func = ReLU()
-    
+
+    def init_optimizer(self):
+        if self.optimizer == "sgd":
+            self.optimizer_func = SGD(self.layers, self.learning_rate, self.epsilon)
+        elif self.optimizer == "momentum":
+            self.optimizer_func = Momentum(self.layers, self.learning_rate, self.momentum, self.epsilon)
+        elif self.optimizer == "nag":
+            self.optimizer_func = Nestrov(self.layers, self.learning_rate, self.momentum, self.epsilon)
+        elif self.optimizer == "rmsprop":
+            self.optimizer_func = RMSProp(self.layers, self.learning_rate, self.beta, self.epsilon)
+        elif self.optimizer == "adam":
+            self.optimizer_func = Adam(self.layers, self.learning_rate, self.beta1, self.beta2, self.epsilon)
+        elif self.optimizer == "nadam":
+            self.optimizer_func = NAdam(self.layers, self.learning_rate, self.beta1, self.beta2, self.epsilon)
+
     def init_loss(self):
         if self.loss == "cross_entropy":
             self.output_func = Softmax()
@@ -106,9 +119,10 @@ class NeuralNetwork():
         prev_grad = self.loss_func.diff()
         for layer in self.layers[::-1]:
             prev_grad = layer.diff(prev_grad)
-
-    def print_status(self):
-        pass
+        # L2 regularization  
+        for layer in self.layers:
+            if isinstance(layer, Linear):  
+                layer.dw += self.weight_decay * layer.weight
 
     def run(self, xtrain, ytrain, xvalid, yvalid):
         n_batch = xtrain.shape[0] // self.batch_size
@@ -135,72 +149,8 @@ class NeuralNetwork():
 
                 # backward prop
                 self.backwardPass()
-                
-                # # gradient descent
-                # for k, layer in enumerate(self.layers):
-                #     if isinstance(layer, Linear):
-                #         # print("layer: ", k, "dw norm: ", np.linalg.norm(layer.dw), "db norm: ", np.linalg.norm(layer.db))
-                #         layer.weight -= self.learning_rate * (layer.dw + self.weight_decay * layer.weight) 
-                #         layer.bias -= self.learning_rate * layer.db
 
-                # momentum based gradient descent
-                # for layer in self.layers:
-                #     if isinstance(layer, Linear):
-                #         layer.uw = self.momentum * layer.uw + layer.dw
-                #         layer.ub = self.momentum * layer.ub + layer.db
-                #         layer.weight -= self.learning_rate * layer.uw
-                #         layer.bias -= self.learning_rate * layer.ub
-                        
-                # nesterov based gradient descent
-                # for layer in self.layers:
-                #     if isinstance(layer, Linear):
-                #         layer.uw = self.momentum * layer.uw + layer.dw
-                #         layer.ub = self.momentum * layer.ub + layer.db
-
-                #         layer.weight -= self.learning_rate * (self.momentum * layer.uw + layer.dw)
-                #         layer.bias -= self.learning_rate * (self.momentum * layer.ub + layer.db)
-
-
-                # rmsprop based gradient descent
-                # for layer in self.layers:
-                #     if isinstance(layer, Linear):
-                #         layer.uw = self.beta * layer.uw + (1-self.beta) * np.square(layer.dw)
-                #         layer.ub = self.beta * layer.ub + (1-self.beta) * np.square(layer.db)
-                #         layer.weight -= (self.learning_rate * layer.dw) / (np.sqrt(layer.uw) + self.epsilon)
-                #         layer.bias -= (self.learning_rate * layer.db) / (np.sqrt(layer.ub) + self.epsilon)
-
-                # adam based gradient descent
-                # for layer in self.layers:
-                #     if isinstance(layer, Linear):
-                #         layer.mw = self.beta1 * layer.mw + (1-self.beta1) * layer.dw
-                #         layer.mb = self.beta1 * layer.mb + (1-self.beta1) * layer.db
-                #         layer.uw = self.beta2 * layer.uw + (1-self.beta2) * np.square(layer.dw)
-                #         layer.ub = self.beta2 * layer.ub + (1-self.beta2) * np.square(layer.db)
-
-                #         # bias correcting
-                #         mw_hat = layer.mw / (1-np.power(self.beta1, i+1))
-                #         mb_hat = layer.mb / (1-np.power(self.beta1, i+1))
-                #         uw_hat = layer.uw / (1-np.power(self.beta2, i+1))
-                #         ub_hat = layer.ub / (1-np.power(self.beta2, i+1))
-
-                #         layer.weight -= (self.learning_rate * mw_hat) / (np.sqrt(uw_hat) + self.epsilon)
-                #         layer.bias -= (self.learning_rate * mb_hat) / (np.sqrt(ub_hat) + self.epsilon)
-
-                # nadam based gradient descent
-                for layer in self.layers:
-                    if isinstance(layer, Linear):
-                        layer.mw = self.beta1 * layer.mw + (1-self.beta1) * layer.dw
-                        layer.mb = self.beta1 * layer.mb + (1-self.beta1) * layer.db
-                        layer.uw = self.beta2 * layer.uw + (1-self.beta2) * np.square(layer.dw)
-                        layer.ub = self.beta2 * layer.ub + (1-self.beta2) * np.square(layer.db)
-
-                        mw_hat = layer.mw / (1-np.power(self.beta1, i+1))
-                        mb_hat = layer.mb / (1-np.power(self.beta1, i+1))
-                        uw_hat = layer.uw / (1-np.power(self.beta2, i+1))
-                        ub_hat = layer.ub / (1-np.power(self.beta2, i+1))
-
-                        layer.weight -= (self.learning_rate / (np.sqrt(uw_hat) + self.epsilon)) * ((self.beta1 * mw_hat) + (((1-self.beta1) * layer.dw) / (1-np.power(self.beta1,i+1))))
-                        layer.bias -= (self.learning_rate / (np.sqrt(ub_hat) + self.epsilon)) * ((self.beta1 * mb_hat) + (((1-self.beta1) * layer.db) / (1-np.power(self.beta1,i+1))))
+                self.optimizer_func(i+1)
 
             # valid forward prop
             n_batch = xvalid.shape[0] // self.batch_size
