@@ -41,8 +41,11 @@ class ReLU:
 
 class Softmax:
     def __call__(self, x):
-        self.x = x      # for backprop
-        self.out = np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
+        self.x = x
+        # self.out = np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
+        shifted = x - np.max(x, axis=1, keepdims=True)
+        exps = np.exp(shifted)
+        self.out = exps / np.sum(exps, axis=1, keepdims=True)
         return self.out
     def diff(self, prev_grad):
         e_l = prev_grad != 0.

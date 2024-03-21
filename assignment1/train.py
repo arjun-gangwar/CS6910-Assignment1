@@ -57,7 +57,7 @@ def main(args: argparse.Namespace):
             },
             'parameters': {
                 'epochs': {
-                    'values': [5,10]
+                    'values': [5,10,15]
                 },
                 'num_layers': {
                     'values': [3,4,5]
@@ -85,7 +85,7 @@ def main(args: argparse.Namespace):
         sweep_id = wandb.sweep(sweep=sweep_config, project=args.wandb_project)
 
     if args.use_wandb == "true":
-        wandb.agent(sweep_id, function=wandb_sweep, count=5)
+        wandb.agent(sweep_id, function=wandb_sweep, count=200)
         wandb.finish()
     else:
         nn = NeuralNetwork(
