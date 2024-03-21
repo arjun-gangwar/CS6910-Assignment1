@@ -150,6 +150,7 @@ class NeuralNetwork():
                 # backward prop
                 self.backwardPass()
 
+                # run optimizer
                 self.optimizer_func(i+1)
 
             # valid forward prop
@@ -173,10 +174,20 @@ class NeuralNetwork():
             # print stats per epoch
             print("- - - - - - - - - - - -")
             print(f'epoch {i}')
-            print(f"loss: {np.array(loss).mean()}")
-            print(f"acc: {np.array(acc).mean()}")
-            print(f"valid loss: {np.array(valid_loss).mean()}")
-            print(f"valid acc: {np.array(valid_acc).mean()}")
+            avg_loss = np.array(loss).mean()
+            avg_acc = np.array(acc).mean()
+            avg_valid_loss = np.array(valid_loss).mean()
+            avg_valid_acc = np.array(valid_acc).mean()
+            print(f"loss: {avg_loss}")
+            print(f"acc: {avg_acc}")
+            print(f"valid loss: {avg_valid_loss}")
+            print(f"valid acc: {avg_valid_acc}")
+
+            # store in model
+            self.train_loss_history.append(avg_loss)
+            self.train_acc_history.append(avg_acc)
+            self.valid_loss_history.append(avg_valid_loss)
+            self.valid_acc_history.append(avg_valid_acc)
 
 
 
