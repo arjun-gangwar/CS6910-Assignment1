@@ -3,11 +3,11 @@ wandb_project=fake
 wandb_entity=fake
 dataset=fake
 epochs=10
-batch_size=16
+batch_size=64
 loss=cross_entropy
 optimizer=sgd
-learning_rate=1e-3
-momentum=0.5
+learning_rate=1e-4
+momentum=0.9
 beta=0.9
 beta1=0.9
 beta2=0.999
@@ -15,7 +15,7 @@ epsilon=1e-8
 weight_decay=0.0005
 weight_init=xavier
 num_layers=3
-hidden_size=128
+hidden_size=256
 activation=relu
 
 python train.py \

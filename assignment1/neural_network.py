@@ -146,13 +146,20 @@ class NeuralNetwork():
                 # momentum based gradient descent
                 # for layer in self.layers:
                 #     if isinstance(layer, Linear):
-                #         layer.uw = self.beta * layer.uw + layer.dw
-                #         layer.ub = self.beta * layer.ub + layer.db
+                #         layer.uw = self.momentum * layer.uw + layer.dw
+                #         layer.ub = self.momentum * layer.ub + layer.db
                 #         layer.weight -= self.learning_rate * layer.uw
                 #         layer.bias -= self.learning_rate * layer.ub
                         
-                # nesterov based gradient descent (to be implemented)
-                
+                # nesterov based gradient descent
+                for layer in self.layers:
+                    if isinstance(layer, Linear):
+                        layer.uw = self.momentum * layer.uw + layer.dw
+                        layer.ub = self.momentum * layer.ub + layer.db
+
+                        layer.weight -= self.learning_rate * (self.momentum * layer.uw + layer.dw)
+                        layer.bias -= self.learning_rate * (self.momentum * layer.ub + layer.db)
+
 
                 # rmsprop based gradient descent
                 # for layer in self.layers:
@@ -163,24 +170,26 @@ class NeuralNetwork():
                 #         layer.bias -= (self.learning_rate * layer.db) / (np.sqrt(layer.ub) + self.epsilon)
 
                 # adam based gradient descent
+                # for layer in self.layers:
+                #     if isinstance(layer, Linear):
+                #         layer.mw = self.beta1 * layer.mw + (1-self.beta1) * layer.dw
+                #         layer.mb = self.beta1 * layer.mb + (1-self.beta1) * layer.db
+                #         layer.uw = self.beta2 * layer.uw + (1-self.beta2) * np.square(layer.dw)
+                #         layer.ub = self.beta2 * layer.ub + (1-self.beta2) * np.square(layer.db)
+
+                #         # bias correcting
+                #         mw_hat = layer.mw / (1-np.power(self.beta1, i+1))
+                #         mb_hat = layer.mb / (1-np.power(self.beta1, i+1))
+                #         uw_hat = layer.uw / (1-np.power(self.beta2, i+1))
+                #         ub_hat = layer.ub / (1-np.power(self.beta2, i+1))
+
+                #         layer.weight -= (self.learning_rate * mw_hat) / (np.sqrt(uw_hat) + self.epsilon)
+                #         layer.bias -= (self.learning_rate * mb_hat) / (np.sqrt(ub_hat) + self.epsilon)
+
+                # nadam based gradient descent
                 for layer in self.layers:
                     if isinstance(layer, Linear):
-                        layer.mw = self.beta1 * layer.mw + (1-self.beta1) * layer.dw
-                        layer.mb = self.beta1 * layer.mb + (1-self.beta1) * layer.db
-                        layer.uw = self.beta2 * layer.uw + (1-self.beta2) * np.square(layer.dw)
-                        layer.ub = self.beta2 * layer.ub + (1-self.beta2) * np.square(layer.db)
-
-                        # bias correcting
-                        mw_hat = layer.mw / (1-np.power(self.beta1, i+1))
-                        mb_hat = layer.mb / (1-np.power(self.beta1, i+1))
-                        uw_hat = layer.uw / (1-np.power(self.beta2, i+1))
-                        ub_hat = layer.ub / (1-np.power(self.beta2, i+1))
-
-                        layer.weight -= (self.learning_rate * mw_hat) / (np.sqrt(uw_hat) + self.epsilon)
-                        layer.bias -= (self.learning_rate * mb_hat) / (np.sqrt(ub_hat) + self.epsilon)
-
-                # nadam based gradient descent (to be implemented)
-                
+                        pass
 
             # valid forward prop
             n_batch = xvalid.shape[0] // self.batch_size
