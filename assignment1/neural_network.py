@@ -1,3 +1,4 @@
+import wandb
 import numpy as np
 from helper import one_hot_encode, DataLoader
 from layer import Linear
@@ -7,6 +8,7 @@ from optimizer import SGD, Momentum, Nestrov, RMSProp, Adam, NAdam
 
 class NeuralNetwork():
     def __init__(self,
+                 use_wandb: bool,
                  wandb_project: str,
                  wandb_entity: str,
                  in_dim: int,
@@ -26,6 +28,7 @@ class NeuralNetwork():
                  num_layers: int,
                  hidden_size: int,
                  activation: str):
+        self.use_wandb=use_wandb
         self.wandb_project = wandb_project
         self.wandb_entity = wandb_entity
         self.in_dim = in_dim
@@ -189,7 +192,12 @@ class NeuralNetwork():
             self.valid_loss_history.append(avg_valid_loss)
             self.valid_acc_history.append(avg_valid_acc)
 
-
-
-
-    
+            # log for wandb
+            if self.use_wandb == "true":
+                wandb.log({
+                    'epoch': i,
+                    'training_loss': avg_loss,
+                    'validation_loss': avg_valid_loss,
+                    'training_accuracy': avg_acc,
+                    'validation_accuracy': avg_valid_acc
+                })

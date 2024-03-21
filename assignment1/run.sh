@@ -1,6 +1,7 @@
 #!/bin/bash
-wandb_project=fake
-wandb_entity=fake
+use_wandb=true
+wandb_project=CS6910-Assignment1
+wandb_entity=track-experiments
 dataset=fashion_mnist
 epochs=10
 batch_size=64
@@ -19,6 +20,7 @@ hidden_size=256
 activation=tanh
 
 python train.py \
+    --use_wandb ${use_wandb} \
     --wandb_project ${wandb_project} \
     --wandb_entity ${wandb_entity} \
     --dataset ${dataset} \
