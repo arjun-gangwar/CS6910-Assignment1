@@ -1,7 +1,7 @@
 import numpy as np
 from helper import one_hot_encode, DataLoader
 from layer import Linear
-from activation import Sigmoid, Softmax, Tanh
+from activation import Sigmoid, Softmax, Tanh, ReLU
 from loss import CrossEntropyLoss
 from optimizer import SGD, MomentumSGD, NestrovSGD, RMSProp, Adam, NAdam
 
@@ -64,8 +64,10 @@ class NeuralNetwork():
     def init_activation(self):
         if self.activation == "sigmoid":
             self.activation_func = Sigmoid()
-        if self.activation == "tanh":
+        elif self.activation == "tanh":
             self.activation_func = Tanh()
+        elif self.activation == "relu":
+            self.activation_func = ReLU()
     
     def init_loss(self):
         if self.loss == "cross_entropy":
@@ -142,18 +144,43 @@ class NeuralNetwork():
                 #         layer.bias -= self.learning_rate * layer.db
 
                 # momentum based gradient descent
-                beta = 0.90
                 # for layer in self.layers:
                 #     if isinstance(layer, Linear):
-                #         layer.uw = beta * layer.uw + layer.dw
-                #         layer.ub = beta * layer.ub + layer.db
+                #         layer.uw = self.beta * layer.uw + layer.dw
+                #         layer.ub = self.beta * layer.ub + layer.db
                 #         layer.weight -= self.learning_rate * layer.uw
                 #         layer.bias -= self.learning_rate * layer.ub
                         
-                # nesterov based gradient descent
+                # nesterov based gradient descent (to be implemented)
                 
 
-                # adam based gradient descents
+                # rmsprop based gradient descent
+                # for layer in self.layers:
+                #     if isinstance(layer, Linear):
+                #         layer.uw = self.beta * layer.uw + (1-self.beta) * np.square(layer.dw)
+                #         layer.ub = self.beta * layer.ub + (1-self.beta) * np.square(layer.db)
+                #         layer.weight -= (self.learning_rate * layer.dw) / (np.sqrt(layer.uw) + self.epsilon)
+                #         layer.bias -= (self.learning_rate * layer.db) / (np.sqrt(layer.ub) + self.epsilon)
+
+                # adam based gradient descent
+                for layer in self.layers:
+                    if isinstance(layer, Linear):
+                        layer.mw = self.beta1 * layer.mw + (1-self.beta1) * layer.dw
+                        layer.mb = self.beta1 * layer.mb + (1-self.beta1) * layer.db
+                        layer.uw = self.beta2 * layer.uw + (1-self.beta2) * np.square(layer.dw)
+                        layer.ub = self.beta2 * layer.ub + (1-self.beta2) * np.square(layer.db)
+
+                        # bias correcting
+                        mw_hat = layer.mw / (1-np.power(self.beta1, i+1))
+                        mb_hat = layer.mb / (1-np.power(self.beta1, i+1))
+                        uw_hat = layer.uw / (1-np.power(self.beta2, i+1))
+                        ub_hat = layer.ub / (1-np.power(self.beta2, i+1))
+
+                        layer.weight -= (self.learning_rate * mw_hat) / (np.sqrt(uw_hat) + self.epsilon)
+                        layer.bias -= (self.learning_rate * mb_hat) / (np.sqrt(ub_hat) + self.epsilon)
+
+                # nadam based gradient descent (to be implemented)
+                
 
             # valid forward prop
             n_batch = xvalid.shape[0] // self.batch_size

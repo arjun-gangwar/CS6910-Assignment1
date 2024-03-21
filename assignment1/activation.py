@@ -25,6 +25,19 @@ class Tanh:
         return []
     def d_parameters(self):
         return []
+    
+class ReLU:
+    def __call__(self, x):
+        self.x = x
+        self.out = np.maximum(0, x)
+        return self.out
+    def diff(self, prev_grad):
+        diff = (self.out > 0).astype(int)
+        return prev_grad * diff
+    def parameters(self):
+        return []
+    def d_parameters(self):
+        return []
 
 class Softmax:
     def __call__(self, x):

@@ -13,6 +13,8 @@ class Linear:
         self.db = None
         self.uw = 0.
         self.ub = 0.
+        self.mw = 0.
+        self.mb = 0.
     def __call__(self, x):      # (B x fan_in) x (fan_in x fan_out)
         self.x = x
         self.out = x @ self.weight + self.bias
