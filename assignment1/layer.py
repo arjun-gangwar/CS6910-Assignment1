@@ -11,6 +11,8 @@ class Linear:
             self.bias = np.zeros(fan_out)
         self.dw = None
         self.db = None
+        self.uw = 0.
+        self.ub = 0.
     def __call__(self, x):      # (B x fan_in) x (fan_in x fan_out)
         self.x = x
         self.out = x @ self.weight + self.bias

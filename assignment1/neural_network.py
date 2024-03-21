@@ -134,21 +134,26 @@ class NeuralNetwork():
                 # backward prop
                 self.backwardPass()
                 
-                # gradient descent
-                for k, layer in enumerate(self.layers):
-                    if isinstance(layer, Linear):
-                        # print("layer: ", k, "dw norm: ", np.linalg.norm(layer.dw), "db norm: ", np.linalg.norm(layer.db))
-                        layer.weight -= self.learning_rate * (layer.dw + self.weight_decay * layer.weight) 
-                        layer.bias -= self.learning_rate * layer.db
+                # # gradient descent
+                # for k, layer in enumerate(self.layers):
+                #     if isinstance(layer, Linear):
+                #         # print("layer: ", k, "dw norm: ", np.linalg.norm(layer.dw), "db norm: ", np.linalg.norm(layer.db))
+                #         layer.weight -= self.learning_rate * (layer.dw + self.weight_decay * layer.weight) 
+                #         layer.bias -= self.learning_rate * layer.db
 
                 # momentum based gradient descent
-                # beta = 0.90
-                # for layer in layers:
+                beta = 0.90
+                # for layer in self.layers:
                 #     if isinstance(layer, Linear):
                 #         layer.uw = beta * layer.uw + layer.dw
                 #         layer.ub = beta * layer.ub + layer.db
-                #         layer.weight -= eta * layer.uw
-                #         layer.bias -= eta * layer.ub
+                #         layer.weight -= self.learning_rate * layer.uw
+                #         layer.bias -= self.learning_rate * layer.ub
+                        
+                # nesterov based gradient descent
+                
+
+                # adam based gradient descents
 
             # valid forward prop
             n_batch = xvalid.shape[0] // self.batch_size
