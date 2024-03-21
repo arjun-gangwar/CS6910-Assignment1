@@ -88,7 +88,7 @@ class NeuralNetwork():
     def init_loss(self):
         if self.loss == "cross_entropy":
             self.output_func = Softmax()
-            self.loss_func = CrossEntropyLoss()
+            self.loss_func = CrossEntropyLoss(self.epsilon)
             
     def init_network(self):
         for i in range(self.num_layers):
@@ -196,8 +196,8 @@ class NeuralNetwork():
             if self.use_wandb == "true":
                 wandb.log({
                     'epoch': i,
-                    'training_loss': avg_loss,
-                    'validation_loss': avg_valid_loss,
-                    'training_accuracy': avg_acc,
-                    'validation_accuracy': avg_valid_acc
+                    'avg_train_loss': avg_loss,
+                    'avg_valid_loss': avg_valid_loss,
+                    'avg_train_acc': avg_acc,
+                    'avg_valid_acc': avg_valid_acc
                 })
