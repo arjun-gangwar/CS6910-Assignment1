@@ -27,9 +27,9 @@ class NeuralNetwork():
                  num_layers: int,
                  hidden_size: int,
                  activation: str):
-        # self.wandb_project = wandb_project
-        # self.wandb_entity = wandb_entity
-        # self.dataset = dataset
+        self.wandb_project = wandb_project
+        self.wandb_entity = wandb_entity
+        self.dataset = dataset
         self.in_dim = in_dim
         self.out_dim = out_dim
         self.epochs = epochs
@@ -152,13 +152,13 @@ class NeuralNetwork():
                 #         layer.bias -= self.learning_rate * layer.ub
                         
                 # nesterov based gradient descent
-                for layer in self.layers:
-                    if isinstance(layer, Linear):
-                        layer.uw = self.momentum * layer.uw + layer.dw
-                        layer.ub = self.momentum * layer.ub + layer.db
+                # for layer in self.layers:
+                #     if isinstance(layer, Linear):
+                #         layer.uw = self.momentum * layer.uw + layer.dw
+                #         layer.ub = self.momentum * layer.ub + layer.db
 
-                        layer.weight -= self.learning_rate * (self.momentum * layer.uw + layer.dw)
-                        layer.bias -= self.learning_rate * (self.momentum * layer.ub + layer.db)
+                #         layer.weight -= self.learning_rate * (self.momentum * layer.uw + layer.dw)
+                #         layer.bias -= self.learning_rate * (self.momentum * layer.ub + layer.db)
 
 
                 # rmsprop based gradient descent
@@ -189,7 +189,18 @@ class NeuralNetwork():
                 # nadam based gradient descent
                 for layer in self.layers:
                     if isinstance(layer, Linear):
-                        pass
+                        layer.mw = self.beta1 * layer.mw + (1-self.beta1) * layer.dw
+                        layer.mb = self.beta1 * layer.mb + (1-self.beta1) * layer.db
+                        layer.uw = self.beta2 * layer.uw + (1-self.beta2) * np.square(layer.dw)
+                        layer.ub = self.beta2 * layer.ub + (1-self.beta2) * np.square(layer.db)
+
+                        mw_hat = layer.mw / (1-np.power(self.beta1, i+1))
+                        mb_hat = layer.mb / (1-np.power(self.beta1, i+1))
+                        uw_hat = layer.uw / (1-np.power(self.beta2, i+1))
+                        ub_hat = layer.ub / (1-np.power(self.beta2, i+1))
+
+                        layer.weight -= (self.learning_rate / (np.sqrt(uw_hat) + self.epsilon)) * ((self.beta1 * mw_hat) + (((1-self.beta1) * layer.dw) / (1-np.power(self.beta1,i+1))))
+                        layer.bias -= (self.learning_rate / (np.sqrt(ub_hat) + self.epsilon)) * ((self.beta1 * mb_hat) + (((1-self.beta1) * layer.db) / (1-np.power(self.beta1,i+1))))
 
             # valid forward prop
             n_batch = xvalid.shape[0] // self.batch_size
