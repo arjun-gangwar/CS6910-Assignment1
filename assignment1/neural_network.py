@@ -2,8 +2,8 @@ import wandb
 import numpy as np
 from helper import one_hot_encode, DataLoader
 from layer import Linear
-from activation import Sigmoid, Softmax, Tanh, ReLU
-from loss import CrossEntropyLoss
+from activation import Sigmoid, Softmax, Tanh, ReLU, SoftmaxMSE
+from loss import CrossEntropyLoss, MeanSquareLoss
 from optimizer import SGD, Momentum, Nestrov, RMSProp, Adam, NAdam
 
 class NeuralNetwork():
@@ -89,6 +89,9 @@ class NeuralNetwork():
         if self.loss == "cross_entropy":
             self.output_func = Softmax()
             self.loss_func = CrossEntropyLoss(self.epsilon)
+        elif self.loss == "mse":
+            self.output_func = SoftmaxMSE()
+            self.loss_func = MeanSquareLoss(self.epsilon)
             
     def init_network(self):
         for i in range(self.num_layers):
@@ -121,7 +124,10 @@ class NeuralNetwork():
     def backwardPass(self):
         prev_grad = self.loss_func.diff()
         for layer in self.layers[::-1]:
-            prev_grad = layer.diff(prev_grad)
+            if self.loss == "mse" and isinstance(layer, SoftmaxMSE):
+                prev_grad = layer.diff(prev_grad, self.loss_func.y_enc)
+            else:
+                prev_grad = layer.diff(prev_grad)
         # L2 regularization  
         for layer in self.layers:
             if isinstance(layer, Linear):  

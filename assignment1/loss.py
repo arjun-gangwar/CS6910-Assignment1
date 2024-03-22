@@ -26,7 +26,7 @@ class MeanSquareLoss:
         self.out = np.mean(np.square(self.y_enc - self.y_hat)) / 2
         return self.out
     def diff(self):
-        return np.mean(-1 * (self.y_enc - self.y_hat), axis=0)
+        return -1 * (self.y_enc - self.y_hat)
     def parameters(self):
         return []
     def d_parameters(self):

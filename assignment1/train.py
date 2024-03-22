@@ -85,7 +85,7 @@ def main(args: argparse.Namespace):
         sweep_id = wandb.sweep(sweep=sweep_config, project=args.wandb_project)
 
     if args.use_wandb == "true":
-        wandb.agent(sweep_id, function=wandb_sweep, count=200)
+        wandb.agent(sweep_id, function=wandb_sweep, count=10)
         wandb.finish()
     else:
         nn = NeuralNetwork(
