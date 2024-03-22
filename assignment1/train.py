@@ -1,8 +1,8 @@
-import numpy
 import wandb
 import argparse
-from keras.datasets import fashion_mnist;
-from keras.datasets import mnist;
+import numpy as np
+from keras.datasets import fashion_mnist
+from keras.datasets import mnist
 from neural_network import NeuralNetwork
 
 def wandb_sweep():
@@ -110,8 +110,14 @@ def main(args: argparse.Namespace):
             hidden_size=args.hidden_size,
             activation=args.activation,
         )
-
+        
         nn.run(xtrain, ytrain, xvalid, yvalid)
+        ypred = nn.test(xtest, ytest)
+
+        wandb.init(project=args.wandb_project)
+        wandb.run.name="confusion_matrix"
+        wandb.log({"confusion_matrix" : wandb.plot.confusion_matrix(probs=None, y_true=ytest, preds=ypred, class_names=labels)})
+        wandb.finish()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Training Parameters")
@@ -214,13 +220,37 @@ if __name__ == "__main__":
 
     if args.dataset == 'fashion_mnist':
         (xtrain, ytrain), (xtest, ytest) = fashion_mnist.load_data()
+        labels = {0: "T-shirt/top",
+          1: "Trouser",
+          2: "Pullover",
+          3: "Dress",
+          4: "Coat",
+          5: "Sandal",
+          6: "Shirt",
+          7: "Sneaker",
+          8: "Bag",
+          9: "Ankle boot"}
     elif args.dataset == 'mnist':
         (xtrain, ytrain), (xtest, ytest) = mnist.load_data()
+        labels = {0: "0",
+          1: "1",
+          2: "2",
+          3: "3",
+          4: "4",
+          5: "5",
+          6: "6",
+          7: "7",
+          8: "8",
+          9: "9"}
 
     # split test into  valid and test
-    n = xtest.shape[0]//2
-    xvalid, yvalid = xtest[:n,:,:], ytest[:n]
-    xtest, ytest = xtest[n:,:,:], ytest[n:]
+    idx = np.random.permutation(xtrain.shape[0])
+    shuffled_xtrain = xtrain[idx,:,:]
+    shuffled_ytrain = ytrain[idx]
+
+    n = int(xtrain.shape[0] * 0.90)
+    xtrain, ytrain = shuffled_xtrain[:n,:,:], shuffled_ytrain[:n]
+    xvalid, yvalid = shuffled_xtrain[n:,:,:], shuffled_ytrain[n:]
 
     # normalizing data
     xtrain = xtrain.reshape(xtrain.shape[0], -1) / 255

@@ -201,3 +201,30 @@ class NeuralNetwork():
                     'avg_train_acc': avg_acc,
                     'avg_valid_acc': avg_valid_acc
                 })
+
+    def test(self, xtest, ytest):
+        n_batch = int(np.ceil(xtest.shape[0] / self.batch_size))
+        ypred = []
+
+        for i in range(n_batch):
+            start = i * self.batch_size
+            end = start + self.batch_size
+            xb = xtest[start:end, :]
+            yb = ytest[start:end]
+            yb_enc = one_hot_encode(yb, self.out_dim)
+
+            y_hat = self.forwardPass(xb)
+
+            # calculate correct class
+            pred = np.argmax(y_hat, axis=-1)
+
+            for x in pred:
+                ypred.append(x)
+
+        test_acc = (ypred==ytest).sum() / xtest.shape[0]
+
+        # print stats per epoch
+        print("- - - - - - - - - - - -")
+        print(f"test acc: {test_acc}")
+
+        return ypred
