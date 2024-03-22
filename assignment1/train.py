@@ -114,10 +114,11 @@ def main(args: argparse.Namespace):
         nn.run(xtrain, ytrain, xvalid, yvalid)
         ypred = nn.test(xtest, ytest)
 
-        wandb.init(project=args.wandb_project)
-        wandb.run.name="confusion_matrix"
-        wandb.log({"confusion_matrix" : wandb.plot.confusion_matrix(probs=None, y_true=ytest, preds=ypred, class_names=labels)})
-        wandb.finish()
+        if args.use_wandb == "true":
+            wandb.init(project=args.wandb_project)
+            wandb.run.name="confusion_matrix"
+            wandb.log({"confusion_matrix" : wandb.plot.confusion_matrix(probs=None, y_true=ytest, preds=ypred, class_names=labels)})
+            wandb.finish()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Training Parameters")
